@@ -7,10 +7,10 @@ const Schema = mongoose.Schema;
 
 const Course = new Schema(
   {
-    name: { type: String, requireq: true },
+    name: { type: String, required: true },
     description: { type: String },
     image: { type: String },
-    videoId: { type: String, requireq: true },
+    videoId: { type: String, required: true },
     level: { type: String },
     slug: { type: String, slug: 'name', unique: true },
   },
@@ -22,8 +22,8 @@ const Course = new Schema(
 
 mongoose.plugin(slug);
 Course.plugin(mongooseDelete, {
-  overrideMethods: 'all',
   deletedAt: true,
+  overrideMethods: 'all',
 });
 
 module.exports = mongoose.model('Course', Course);
