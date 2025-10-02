@@ -51,20 +51,50 @@ class CourseController {
 
   // [Delete] /courses/:id/force
   forceDestroy(req, res, next) {
-     Course.deleteOne({ _id: req.params.id })
+    Course.deleteOne({ _id: req.params.id })
       .then(() => res.redirect('/me/stored/courses'))
       .catch(next);
   }
 
-  // [Restore] /courses/:id/restore
+  // [PATCH] /courses/:id/restore
   restore(req, res, next) {
     Course.restore({ _id: req.params.id })
-
       .then(() => {
         return Course.updateOne({ _id: req.params.id }, { deleted: false });
       })
-      .then(() => res.redirect('/me/stored/courses'))
+      .then(() => res.redirect('/me/trash/courses'))
       .catch(next);
+  }
+
+  //[POST] /courses/handle-form-actions
+  handleFormActions(req, res, next) {
+    switch (req.body.action) {
+      //Delete
+      case 'delete':
+        Course.delete({ _id: { $in: req.body.courseIds } })
+          .then(() => res.redirect('/me/stored/courses'))
+          .catch(next);
+        break;
+
+      //Retore
+      case 'restore':
+        Course.restore({ _id: { $in: req.body.courseIds } })
+          .then(() => {
+            return Course.updateOne({ _id: { $in: req.body.courseIds } }, { deleted: false });
+          })
+          .then(() => res.redirect('/me/trash/courses'))
+          .catch(next);
+        break;
+
+      //Force
+      case 'force':
+        Course.deleteOne({ _id: { $in: req.body.courseIds } })
+          .then(() => res.redirect('/me/trash/courses'))
+          .catch(next);
+        break;
+      default:
+        res.json({ message: 'Action invalid!' });
+    }
   }
 }
 module.exports = new CourseController();
